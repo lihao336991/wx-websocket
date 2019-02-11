@@ -1,0 +1,23 @@
+{
+    "name": "myapp",
+    "version": "0.0.0",
+    "private": true,
+    "scripts": {
+        "start": "node ./bin/www"
+    },
+    "dependencies": {
+        "cookie-parser": "~1.4.3",
+        "cors": "^2.8.5",
+        "debug": "~2.6.9",
+        "express": "~4.16.0",
+        "express-session": "^1.15.6",
+        "http-errors": "~1.6.2",
+        "morgan": "~1.9.0",
+        "mysql": "latest",
+        "pug": "2.0.0-beta11",
+        "request": "^2.88.0",
+        "socket.io": "^2.1.1",
+        "websocket": "^1.0.28",
+        "ws": "^6.1.2"
+    }
+}

@@ -1,0 +1,202 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var app = require('../app');
+var debug = require('debug')('myapp:server');
+
+//小程序线上
+// var fs = require('fs');
+// const options = {
+//     key: fs.readFileSync('xxxxxxxxxxxxxxxxxxxxxxxxxxx', 'utf8'),
+//     cert: fs.readFileSync('xxxxxxxxxxxxxxxxxxxxxxxxxxx', 'utf8'),
+// };
+// var https = require('https');
+// var server = https.createServer(options, app);
+
+//本地
+var http = require('http');
+var server = http.createServer(app);
+
+
+
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort('3000');
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+//发送http请求
+var request = require('request');
+/**
+ * Create WebSocket
+ */
+const webSocket = require('ws');
+
+const wss = new webSocket.Server({
+    port: 3001
+});
+
+
+//广播方法
+wss.broadcast = function broadcast(data) {
+    wss.clients.forEach(function each(client) {
+        client.send(data)
+    });
+};
+
+
+//向指定id发送
+wss.notice = function notice(id, data, ws) {
+    try {
+        ws.send('正在发送...')
+        var notice = JSON.stringify({
+            type: 'notice',
+            data: data
+        })
+        let target = sockets[id]
+        if (target) {
+            target.send('收到一条新消息')
+            target.send(notice)
+        } else {
+            ws.send('对方不在线')
+        }
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+
+var sockets = {}
+
+
+try {
+    wss.on('connection', function connection(ws, req) {
+        var id = req.url.slice(1)
+        sockets[id] = ws;
+        // let location = url.parse(ws.upgradeReq.url, true);
+        const ip = req.connection.remoteAddress;
+        //发生错误
+        ws.on('error', function error(error) {
+            console.log('error: %s', error);
+        });
+
+        //断开连接
+        ws.on('close', function close(close) {
+            sockets[id] = null;
+            console.log(id + '已关闭');
+        });
+
+        //收到消息发送回执（谁发的就发给谁）
+        ws.on('message', function message(message) {
+            try {
+                message = JSON.parse(message)
+            } catch (err) {
+                ws.send('请输入正确的数据格式')
+                return
+            }
+            //筛选消息类型
+            //加入房间
+            //退出房间
+            //向xx id通信
+            if (message.type) {
+                switch (message.type) {
+                    case 'join':
+                        ws.send('joining...')
+                            // wss.join(message.data.roomid, message.data.id, ws)                            
+                        break;
+                    case 'leave':
+                        ws.send('leaving...')
+                            // wss.leave(message.data.roomid, message.data.id)
+                        break;
+                    case 'notice':
+                        if (message.data.id && message.data.data) {
+                            wss.notice(message.data.id, message.data.data, ws)
+                        } else {
+                            ws.send('传递参数格式不正确')
+                        }
+                        break;
+                    case 'query':
+                        break;
+                }
+            }
+        });
+        ws.send('连接已开启');
+        ws.send(id + '已连接');
+    });
+} catch (err) {
+    console.log('连接错误')
+}
+
+
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+    var port = parseInt(val, 10);
+
+    if (isNaN(port)) {
+        // named pipe
+        return val;
+    }
+
+    if (port >= 0) {
+        // port number
+        return port;
+    }
+
+    return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+    if (error.syscall !== 'listen') {
+        throw error;
+    }
+
+    var bind = typeof port === 'string' ?
+        'Pipe ' + port :
+        'Port ' + port;
+
+    // handle specific listen errors with friendly messages
+    switch (error.code) {
+        case 'EACCES':
+            console.error(bind + ' requires elevated privileges');
+            process.exit(1);
+            break;
+        case 'EADDRINUSE':
+            console.error(bind + ' is already in use');
+            process.exit(1);
+            break;
+        default:
+            throw error;
+    }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+    var addr = server.address();
+    var bind = typeof addr === 'string' ?
+        'pipe ' + addr :
+        'port ' + addr.port;
+    debug('Listening on ' + bind);
+}
