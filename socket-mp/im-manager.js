@@ -61,24 +61,7 @@ export default class IMManager {
                             //监听到消息 
                             //筛选本房间消息                           
                             //推入视图消息队列
-                        if (!message.data.info || message.data.info.room_id != page.data.consult.room_id) {
-                            return;
-                        }
-                        let arr = page.data.chatItems
-                        if (message.data.info) {
-                            if (arr[arr.length - 1]) {
-                                if (message.data.info.created_at - 180 > arr[arr.length - 1].created_at) {
-                                    message.data.info.showTime = true
-                                }
-                            } else {
-                                message.data.info.showTime = true
-                            }
-                            arr.push(message.data.info)
-                            page.setData({
-                                chatItems: arr
-                            })
-                            page.pageScrollToBottom();
-                        }
+
                         break;
                     case 'join':
 
