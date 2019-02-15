@@ -3,4 +3,4 @@
 
 /socket-server ：服务端项目目录
 
-/socket-mp ：小程序端代码示例
+/socket-mp ：小程序前端代码示例
