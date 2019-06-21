@@ -125,6 +125,5 @@ wss.notice = function notice(id, data, ws) {
 最终作品效果如下：
 [![kafv7R.gif](https://user-gold-cdn.xitu.io/2019/2/11/168dbc8588e5385f?w=212&h=373&f=gif&s=980120)](https://imgchr.com/i/kafv7R)
 
-部分代码细节，请观众老爷们移步 [微信小程序中聊天室的服务端和客户端配置示例](https://github.com/lihao336991/wx-websocket) ^.^
 
 有问题可以一起探讨，顺手点个赞就更好啦！
